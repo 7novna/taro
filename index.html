@@ -436,15 +436,15 @@ function performReading(sp, q, count) {
   
   var prompt = 'Ты профессиональный таролог Яна Белова. Клиент заказал '+SP[sp]+'. Вопрос: "'+q+'". Выпали карты: '+drawn.map(function(c){return c.name+' ('+c.kw+')';}).join(', ')+'. Для каждой карты ровно 2 предложения толкования применительно к вопросу. Общий вывод 4 предложения. ТОЛЬКО JSON: {"cards":['+drawn.map(function(c){return '{"name":"'+c.name+'","reading":"текст"}';}).join(',')+'],"conclusion":"текст"}';
   
-  fetch(WK,+ '/create-payment', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
-      messages:[{role:'user',content:prompt}],
-      max_tokens:Math.min(250*count+500,4000),
-      temperature:0.88
-    })
+  fetch(WK + '/payment-status?id=' + paymentId)
+  .then(r => r.json())
+  .then(payment => {
+    console.log('Статус платежа от Worker:', payment); // <-- добавить
+    if (payment.status === 'succeeded') {
+      // ...
+    } else {
+      alert('Платёж не завершён. Попробуйте ещё раз.');
+    }
   })
   .then(r=>r.json())
   .then(data=>{
