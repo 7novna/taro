@@ -357,7 +357,7 @@ function startReading(){
   sessionStorage.setItem('pendingQ', q);
   sessionStorage.setItem('pendingCount', cardCount);
   
-  fetch('/create-payment', {
+  fetch(WK + '/create-payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -390,7 +390,7 @@ window.addEventListener('DOMContentLoaded', function() {
   var pendingCount = sessionStorage.getItem('pendingCount');
   var paymentId = sessionStorage.getItem('paymentId');
   if (pendingSp && pendingQ && pendingCount && paymentId) {
-    fetch('/payment-status?id=' + paymentId)
+    fetch(WK + '/payment-status?id=' + paymentId)
       .then(r => r.json())
       .then(payment => {
         if (payment.status === 'succeeded') {
@@ -436,7 +436,7 @@ function performReading(sp, q, count) {
   
   var prompt = 'Ты профессиональный таролог Яна Белова. Клиент заказал '+SP[sp]+'. Вопрос: "'+q+'". Выпали карты: '+drawn.map(function(c){return c.name+' ('+c.kw+')';}).join(', ')+'. Для каждой карты ровно 2 предложения толкования применительно к вопросу. Общий вывод 4 предложения. ТОЛЬКО JSON: {"cards":['+drawn.map(function(c){return '{"name":"'+c.name+'","reading":"текст"}';}).join(',')+'],"conclusion":"текст"}';
   
-  fetch(WK,{
+  fetch(WK,+ '/create-payment', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
