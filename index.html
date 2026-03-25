@@ -345,43 +345,63 @@ var drawn=[],ft='';
 function startReading(){
   var q = document.getElementById('qInput').value.trim();
   var sp = document.getElementById('spreadSelect').value;
-  if (!q && sp !== 'own') q = SP[sp] || '';
-  if (!q) { alert('Напишите ваш вопрос картам'); return; }
+  if(!q && sp !== 'own') q = SP[sp] || '';
+  if(!q){alert('Напишите ваш вопрос картам');return;}
   var cardCount = parseInt(document.getElementById('cardCount').value) || 3;
-  var price = cardCount * 50;
   var btn = document.getElementById('orderBtn');
   btn.disabled = true;
-  btn.textContent = '🔮 Создаём платёж...';
-  
-  sessionStorage.setItem('pendingSp', sp);
-  sessionStorage.setItem('pendingQ', q);
-  sessionStorage.setItem('pendingCount', cardCount);
-  
-  fetch(WK + '/create-payment', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      amount: price.toString(),
-      description: 'Расклад Таро: ' + (SP[sp] || q),
-      returnUrl: window.location.href
+  btn.textContent = '🔮 Открываю карты...';
+  var drawn = shuffle(CARDS.slice()).slice(0, cardCount);
+  var rs = document.getElementById('rs');
+  rs.style.display = 'block';
+  rs.scrollIntoView({behavior:'smooth'});
+  var rc = document.getElementById('rcards');
+  rc.innerHTML = '';
+  drawn.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'rcard';
+    d.innerHTML = '<div class="rcard-img"><img src="'+c.img+'" alt="'+c.name+'"/></div><div class="rcard-name">'+c.name+'</div>';
+    rc.appendChild(d);
+  });
+  document.getElementById('ldiv').style.display = 'block';
+  document.getElementById('rdiv').innerHTML = '';
+  document.getElementById('cdiv').style.display = 'none';
+  var prompt = 'Ты профессиональный таролог Яна Белова. Клиент заказал '+SP[sp]+'. Вопрос: "'+q+'". Выпали карты: '+drawn.map(function(c){return c.name+' ('+c.kw+')';}).join(', ')+'. Для каждой карты ровно 2 предложения толкования применительно к вопросу. Общий вывод 4 предложения. ТОЛЬКО JSON: {"cards":['+drawn.map(function(c){return '{"name":"'+c.name+'","reading":"текст"}';}).join(',')+'],"conclusion":"текст"}';
+  fetch(WK,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      messages:[{role:'user',content:prompt}],
+      max_tokens:Math.min(250*cardCount+500,4000),
+      temperature:0.88
     })
   })
-  .then(r => r.json())
-  .then(payment => {
-    if (payment.confirmation && payment.confirmation.confirmation_url) {
-      sessionStorage.setItem('paymentId', payment.id);
-      window.location.href = payment.confirmation.confirmation_url;
-    } else {
-      alert('Ошибка создания платежа');
-      btn.disabled = false;
-      btn.textContent = '🔮 Получить расклад';
+  .then(r=>r.json())
+  .then(data=>{
+    if(data.error)throw new Error(data.error.message);
+    var txt=data.choices[0].message.content.replace(/```json|```/g,'').trim();
+    var p=JSON.parse(txt);
+    document.getElementById('ldiv').style.display='none';
+    var area=document.getElementById('rdiv');
+    p.cards.forEach(function(c,i){
+      var d=document.createElement('div');
+      d.className='rb';
+      d.innerHTML='<div class="rb-name">'+drawn[i].name+'</div><div class="rb-text">'+c.reading+'</div>';
+      area.appendChild(d);
+    });
+    if(p.conclusion){
+      document.getElementById('ctxt').textContent=p.conclusion;
+      document.getElementById('cdiv').style.display='block';
     }
   })
-  .catch(err => {
-    console.error(err);
-    alert('Ошибка при создании платежа');
-    btn.disabled = false;
-    btn.textContent = '🔮 Получить расклад';
+  .catch(e=>{
+    document.getElementById('ldiv').textContent='⚠️ Ошибка: '+e.message;
+    console.error(e);
+  })
+  .finally(()=>{
+    btn.disabled=false;
+    btn.textContent='🔮 Получить расклад';
   });
 }
 window.addEventListener('DOMContentLoaded', function() {
