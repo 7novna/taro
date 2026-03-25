@@ -410,26 +410,12 @@ window.addEventListener('DOMContentLoaded', function() {
   var pendingCount = sessionStorage.getItem('pendingCount');
   var paymentId = sessionStorage.getItem('paymentId');
   if (pendingSp && pendingQ && pendingCount && paymentId) {
-    fetch(WK + '/payment-status?id=' + paymentId)
-      .then(r => r.json())
-      .then(payment => {
-        if (payment.status === 'succeeded') {
-          sessionStorage.removeItem('pendingSp');
-          sessionStorage.removeItem('pendingQ');
-          sessionStorage.removeItem('pendingCount');
-          sessionStorage.removeItem('paymentId');
-          performReading(pendingSp, pendingQ, parseInt(pendingCount));
-        } else {
-          alert('Платёж не завершён. Попробуйте ещё раз.');
-          sessionStorage.removeItem('pendingSp');
-          sessionStorage.removeItem('pendingQ');
-          sessionStorage.removeItem('pendingCount');
-          sessionStorage.removeItem('paymentId');
-          var btn = document.getElementById('orderBtn');
-          if (btn) { btn.disabled = false; btn.textContent = '🔮 Получить расклад'; }
-        }
-      })
-      .catch(err => console.error(err));
+    // Убираем проверку статуса, сразу открываем расклад
+    performReading(pendingSp, pendingQ, parseInt(pendingCount));
+    sessionStorage.removeItem('pendingSp');
+    sessionStorage.removeItem('pendingQ');
+    sessionStorage.removeItem('pendingCount');
+    sessionStorage.removeItem('paymentId');
   }
 });
 
