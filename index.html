@@ -225,10 +225,6 @@ footer p{font-size:18.2px;color:var(--ts);}
   <p style="margin-top:5px;font-size:11px;color:var(--ts);line-height:1.5;">Все расклады носят исключительно развлекательный и информационно-образовательный характер. Не являются предсказанием будущего, медицинской, юридической или финансовой консультацией. Принятие решений остаётся за клиентом.</p>
 </footer>
 
-<script>
-var WK='https://steep-bread-7af1.poponina73.workers.dev';
-var W='https://upload.wikimedia.org/wikipedia/commons/';
-
 var WK='https://steep-bread-7af1.poponina73.workers.dev';
 var W='https://upload.wikimedia.org/wikipedia/commons/';
 
@@ -408,7 +404,7 @@ window.addEventListener('DOMContentLoaded', function() {
     fetch(WK + '/payment-status?id=' + paymentId)
       .then(r => r.json())
       .then(payment => {
-        console.log('Статус платежа:', payment);
+        console.log('Статус платежа от Worker:', payment);
         if (payment.status === 'succeeded') {
           sessionStorage.removeItem('pendingSp');
           sessionStorage.removeItem('pendingQ');
@@ -502,100 +498,6 @@ function copyR(){
   } else {
     alert('Нет текста для копирования');
   }
-}
-
-// Функция, которая делает расклад после оплаты (ваша старая логика)
-function performReading(sp, q, count) {
-  var btn = document.getElementById('orderBtn');
-  btn.disabled = true;
-  btn.textContent = '🔮 Открываю карты...';
-  var drawn = shuffle(CARDS.slice()).slice(0, count);
-  var rs = document.getElementById('rs');
-  rs.style.display = 'block';
-  rs.scrollIntoView({behavior:'smooth'});
-  var rc = document.getElementById('rcards');
-  rc.innerHTML = '';
-  drawn.forEach(function(c){
-    var d = document.createElement('div');
-    d.className = 'rcard';
-    d.innerHTML = '<div class="rcard-img"><img src="'+c.img+'" alt="'+c.name+'"/></div><div class="rcard-name">'+c.name+'</div>';
-    rc.appendChild(d);
-  });
-  document.getElementById('ldiv').style.display = 'block';
-  document.getElementById('rdiv').innerHTML = '';
-  document.getElementById('cdiv').style.display = 'none';
-  
-  var prompt = 'Ты профессиональный таролог Яна Белова. Клиент заказал '+SP[sp]+'. Вопрос: "'+q+'". Выпали карты: '+drawn.map(function(c){return c.name+' ('+c.kw+')';}).join(', ')+'. Для каждой карты ровно 2 предложения толкования применительно к вопросу. Общий вывод 4 предложения. ТОЛЬКО JSON: {"cards":['+drawn.map(function(c){return '{"name":"'+c.name+'","reading":"текст"}';}).join(',')+'],"conclusion":"текст"}';
-  
-  fetch(WK + '/payment-status?id=' + paymentId)
-  .then(r => r.json())
-  .then(payment => {
-    console.log('Статус платежа от Worker:', payment); // <-- добавить
-    if (payment.status === 'succeeded') {
-      // ...
-    } else {
-      alert('Платёж не завершён. Попробуйте ещё раз.');
-    }
-  })
-  .then(r=>r.json())
-  .then(data=>{
-    if(data.error)throw new Error(data.error.message);
-    var txt=data.choices[0].message.content.replace(/```json|```/g,'').trim();
-    var p=JSON.parse(txt);
-    document.getElementById('ldiv').style.display='none';
-    var area=document.getElementById('rdiv');
-    p.cards.forEach(function(c,i){
-      var d=document.createElement('div');
-      d.className='rb';
-      d.innerHTML='<div class="rb-name">'+drawn[i].name+'</div><div class="rb-text">'+c.reading+'</div>';
-      area.appendChild(d);
-    });
-    if(p.conclusion){
-      document.getElementById('ctxt').textContent=p.conclusion;
-      document.getElementById('cdiv').style.display='block';
-    }
-  })
-  .catch(e=>{
-    document.getElementById('ldiv').textContent='⚠️ Ошибка: '+e.message;
-    console.error(e);
-  })
-  .finally(()=>{
-    btn.disabled=false;
-    btn.textContent='🔮 Получить расклад';
-  });
-}
-var DAY_CARDS = [
-  {name:'Шут',kw:'Новое начало ждёт вас. Доверьтесь жизни и сделайте первый шаг — сегодня именно тот день.',img:'https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg'},
-  {name:'Маг',kw:'Ваша воля и мастерство сегодня на высоте. Всё что задумали — воплотите.',img:'https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg'},
-  {name:'Жрица',kw:'Прислушайтесь к внутреннему голосу. Сегодня интуиция не подведёт.',img:'https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg'},
-  {name:'Императрица',kw:'День наполнен изобилием и творческой энергией. Позвольте себе цвести.',img:'https://upload.wikimedia.org/wikipedia/commons/d/d2/RWS_Tarot_03_Empress.jpg'},
-  {name:'Солнце',kw:'Сегодня особенный день — радость и успех сопровождают каждый ваш шаг.',img:'https://upload.wikimedia.org/wikipedia/commons/1/17/RWS_Tarot_19_Sun.jpg'},
-  {name:'Звезда',kw:'Надежда и вдохновение с вами. Мечтайте смело — вселенная слышит.',img:'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_17_Star.jpg'},
-  {name:'Луна',kw:'День снов и интуиции. Не спешите с решениями, доверьтесь ощущениям.',img:'https://upload.wikimedia.org/wikipedia/commons/7/7f/RWS_Tarot_18_Moon.jpg'},
-  {name:'Сила',kw:'Сегодня ваша внутренняя сила особенно велика. Действуйте с мягкостью и уверенностью.',img:'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg'},
-  {name:'Колесо Фортуны',kw:'Перемены идут — и они к лучшему. Доверьтесь течению жизни.',img:'https://upload.wikimedia.org/wikipedia/commons/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg'},
-  {name:'Влюблённые',kw:'День гармонии и сердечных связей. Цените тех кто рядом.',img:'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_06_Lovers.jpg'},
-  {name:'Мир',kw:'Завершение цикла и ощущение полноты. Вы на правильном пути.',img:'https://upload.wikimedia.org/wikipedia/commons/f/ff/RWS_Tarot_21_World.jpg'},
-  {name:'Отшельник',kw:'День для тишины и размышлений. Побудьте наедине с собой — ответы внутри.',img:'https://upload.wikimedia.org/wikipedia/commons/4/4d/RWS_Tarot_09_Hermit.jpg'},
-  {name:'Умеренность',kw:'Найдите баланс и золотую середину. Не торопитесь — всему своё время.',img:'https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg'},
-];
-var dayRevealed = false;
-function revealDayCard() {
-  if (dayRevealed) return;
-  var today = new Date();
-  var idx = (today.getFullYear() * 365 + today.getMonth() * 31 + today.getDate()) % DAY_CARDS.length;
-  var card = DAY_CARDS[idx];
-  var front = document.getElementById('day-front');
-  var back = document.getElementById('day-back');
-  front.src = card.img;
-  front.onload = function() {
-    back.style.opacity = '0';
-    fro
-nt.style.opacity = '1';
-    document.getElementById('day-name').textContent = card.name;
-    document.getElementById('day-kw').textContent = card.kw;
-    dayRevealed = true;
-  };
 }
 </script>
 </body>
