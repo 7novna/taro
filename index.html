@@ -225,6 +225,7 @@ footer p{font-size:18.2px;color:var(--ts);}
   <p style="margin-top:5px;font-size:11px;color:var(--ts);line-height:1.5;">Все расклады носят исключительно развлекательный и информационно-образовательный характер. Не являются предсказанием будущего, медицинской, юридической или финансовой консультацией. Принятие решений остаётся за клиентом.</p>
 </footer>
 
+<script>
 var WK='https://steep-bread-7af1.poponina73.workers.dev';
 var W='https://upload.wikimedia.org/wikipedia/commons/';
 
@@ -364,12 +365,9 @@ function startReading(){
   var btn = document.getElementById('orderBtn');
   btn.disabled = true;
   btn.textContent = '🔮 Создаём платёж...';
-  
-  // Используем localStorage для надёжного хранения на мобильных
   localStorage.setItem('pendingSp', sp);
   localStorage.setItem('pendingQ', q);
   localStorage.setItem('pendingCount', cardCount);
-  
   fetch(WK + '/create-payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -403,7 +401,6 @@ window.addEventListener('DOMContentLoaded', function() {
   var pendingQ = localStorage.getItem('pendingQ');
   var pendingCount = localStorage.getItem('pendingCount');
   var paymentId = localStorage.getItem('paymentId');
-  
   if (pendingSp && pendingQ && pendingCount && paymentId) {
     fetch(WK + '/payment-status?id=' + paymentId)
       .then(r => r.json())
@@ -428,6 +425,7 @@ window.addEventListener('DOMContentLoaded', function() {
       .catch(err => console.error(err));
   }
 });
+
 function performReading(sp, q, count) {
   var btn = document.getElementById('orderBtn');
   btn.disabled = true;
