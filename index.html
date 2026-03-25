@@ -401,12 +401,10 @@ window.addEventListener('DOMContentLoaded', function() {
   var pendingQ = localStorage.getItem('pendingQ');
   var pendingCount = localStorage.getItem('pendingCount');
   var paymentId = localStorage.getItem('paymentId');
-  
   if (pendingSp && pendingQ && pendingCount && paymentId) {
-    // Временно отключаем проверку статуса – сразу открываем расклад
-    console.log('Оплата прошла, открываем расклад');
+    // Временно открываем расклад без проверки статуса
     performReading(pendingSp, pendingQ, parseInt(pendingCount));
-    // Очищаем localStorage
+    // Очищаем данные
     localStorage.removeItem('pendingSp');
     localStorage.removeItem('pendingQ');
     localStorage.removeItem('pendingCount');
