@@ -364,9 +364,12 @@ function startReading(){
   var btn = document.getElementById('orderBtn');
   btn.disabled = true;
   btn.textContent = '🔮 Создаём платёж...';
-  sessionStorage.setItem('pendingSp', sp);
-  sessionStorage.setItem('pendingQ', q);
-  sessionStorage.setItem('pendingCount', cardCount);
+  
+  // Используем localStorage для надёжного хранения на мобильных
+  localStorage.setItem('pendingSp', sp);
+  localStorage.setItem('pendingQ', q);
+  localStorage.setItem('pendingCount', cardCount);
+  
   fetch(WK + '/create-payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -379,7 +382,7 @@ function startReading(){
   .then(r => r.json())
   .then(payment => {
     if(payment.confirmation && payment.confirmation.confirmation_url){
-      sessionStorage.setItem('paymentId', payment.id);
+      localStorage.setItem('paymentId', payment.id);
       window.location.href = payment.confirmation.confirmation_url;
     } else {
       alert('Ошибка создания платежа');
@@ -396,27 +399,28 @@ function startReading(){
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  var pendingSp = sessionStorage.getItem('pendingSp');
-  var pendingQ = sessionStorage.getItem('pendingQ');
-  var pendingCount = sessionStorage.getItem('pendingCount');
-  var paymentId = sessionStorage.getItem('paymentId');
+  var pendingSp = localStorage.getItem('pendingSp');
+  var pendingQ = localStorage.getItem('pendingQ');
+  var pendingCount = localStorage.getItem('pendingCount');
+  var paymentId = localStorage.getItem('paymentId');
+  
   if (pendingSp && pendingQ && pendingCount && paymentId) {
     fetch(WK + '/payment-status?id=' + paymentId)
       .then(r => r.json())
       .then(payment => {
         console.log('Статус платежа от Worker:', payment);
         if (payment.status === 'succeeded') {
-          sessionStorage.removeItem('pendingSp');
-          sessionStorage.removeItem('pendingQ');
-          sessionStorage.removeItem('pendingCount');
-          sessionStorage.removeItem('paymentId');
+          localStorage.removeItem('pendingSp');
+          localStorage.removeItem('pendingQ');
+          localStorage.removeItem('pendingCount');
+          localStorage.removeItem('paymentId');
           performReading(pendingSp, pendingQ, parseInt(pendingCount));
         } else {
           alert('Платёж не завершён. Попробуйте ещё раз.');
-          sessionStorage.removeItem('pendingSp');
-          sessionStorage.removeItem('pendingQ');
-          sessionStorage.removeItem('pendingCount');
-          sessionStorage.removeItem('paymentId');
+          localStorage.removeItem('pendingSp');
+          localStorage.removeItem('pendingQ');
+          localStorage.removeItem('pendingCount');
+          localStorage.removeItem('paymentId');
           document.getElementById('orderBtn').disabled = false;
           document.getElementById('orderBtn').textContent = '🔮 Получить расклад';
         }
@@ -424,7 +428,6 @@ window.addEventListener('DOMContentLoaded', function() {
       .catch(err => console.error(err));
   }
 });
-
 function performReading(sp, q, count) {
   var btn = document.getElementById('orderBtn');
   btn.disabled = true;
