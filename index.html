@@ -410,12 +410,27 @@ window.addEventListener('DOMContentLoaded', function() {
   var pendingCount = sessionStorage.getItem('pendingCount');
   var paymentId = sessionStorage.getItem('paymentId');
   if (pendingSp && pendingQ && pendingCount && paymentId) {
-    // Убираем проверку статуса, сразу открываем расклад
-    performReading(pendingSp, pendingQ, parseInt(pendingCount));
-    sessionStorage.removeItem('pendingSp');
-    sessionStorage.removeItem('pendingQ');
-    sessionStorage.removeItem('pendingCount');
-    sessionStorage.removeItem('paymentId');
+    fetch(WK + '/payment-status?id=' + paymentId)
+      .then(r => r.json())
+      .then(payment => {
+        console.log('Статус платежа от Worker:', payment); // <-- ДОБАВИТЬ ЭТУ СТРОКУ
+        if (payment.status === 'succeeded') {
+          sessionStorage.removeItem('pendingSp');
+          sessionStorage.removeItem('pendingQ');
+          sessionStorage.removeItem('pendingCount');
+          sessionStorage.removeItem('paymentId');
+          performReading(pendingSp, pendingQ, parseInt(pendingCount));
+        } else {
+          alert('Платёж не завершён. Попробуйте ещё раз.');
+          sessionStorage.removeItem('pendingSp');
+          sessionStorage.removeItem('pendingQ');
+          sessionStorage.removeItem('pendingCount');
+          sessionStorage.removeItem('paymentId');
+          document.getElementById('orderBtn').disabled = false;
+          document.getElementById('orderBtn').textContent = '🔮 Получить расклад';
+        }
+      })
+      .catch(err => console.error(err));
   }
 });
 
