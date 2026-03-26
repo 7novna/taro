@@ -359,6 +359,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var countSelect = document.getElementById('cardCount');
   if(countSelect) countSelect.addEventListener('change', updatePrice);
   updatePrice();
+  var spreadSelect = document.getElementById('spreadSelect');
+  if(spreadSelect) toggleQuestion(spreadSelect.value);
 });
 
 function startReading(){
