@@ -334,7 +334,13 @@ function selectSpread(val){
 }
 function toggleQuestion(val){
   var block = document.getElementById('questionBlock');
-  if(block) block.style.display = (val === 'own') ? 'block' : 'none';
+  var qInput = document.getElementById('qInput');
+  if(val === 'own'){
+    block.style.display = 'block';
+  } else {
+    block.style.display = 'none';
+    if(qInput) qInput.value = ''; // ← очистка поля
+  }
 }
 function shuffle(arr){
   for(var i=arr.length-1;i>0;i--){
