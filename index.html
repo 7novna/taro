@@ -228,7 +228,9 @@ footer p{font-size:18.2px;color:var(--ts);}
 <script>
 var WK='https://steep-bread-7af1.poponina73.workers.dev';
 var W='https://upload.wikimedia.org/wikipedia/commons/';
-
+function cleanText(str) {
+  return str.replace(/[^\u0400-\u04FF\u0500-\u052F\u0000-\u007F\u00A0-\u00FF\u2010-\u2027\s]/g, '');
+}
 var CARDS=[
   {name:'Шут',img:W+'9/90/RWS_Tarot_00_Fool.jpg',kw:'свобода, новое начало, доверие жизни'},
   {name:'Маг',img:W+'d/de/RWS_Tarot_01_Magician.jpg',kw:'воля, мастерство, воплощение желаний'},
@@ -405,6 +407,10 @@ function startReading(){
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+  // Инициализация поля вопроса при загрузке страницы
+  var spreadSelect = document.getElementById('spreadSelect');
+  if(spreadSelect) toggleQuestion(spreadSelect.value);
+
   var pendingSp = localStorage.getItem('pendingSp');
   var pendingQ = localStorage.getItem('pendingQ');
   var pendingCount = localStorage.getItem('pendingCount');
@@ -472,15 +478,17 @@ function performReading(sp, q, count) {
     document.getElementById('ldiv').style.display='none';
     var area=document.getElementById('rdiv');
     p.cards.forEach(function(c,i){
-      var d=document.createElement('div');
-      d.className='rb';
-      d.innerHTML='<div class="rb-name">'+drawn[i].name+'</div><div class="rb-text">'+c.reading+'</div>';
-      area.appendChild(d);
-    });
-    if(p.conclusion){
-      document.getElementById('ctxt').textContent=p.conclusion;
-      document.getElementById('cdiv').style.display='block';
-    }
+  var d=document.createElement('div');
+  d.className='rb';
+  var cleanReading = cleanText(c.reading);
+  d.innerHTML='<div class="rb-name">'+drawn[i].name+'</div><div class="rb-text">'+cleanReading+'</div>';
+  area.appendChild(d);
+});
+if(p.conclusion){
+  var cleanConclusion = cleanText(p.conclusion);
+  document.getElementById('ctxt').textContent=cleanConclusion;
+  document.getElementById('cdiv').style.display='block';
+}
   })
   .catch(e=>{
     document.getElementById('ldiv').textContent='⚠️ Ошибка: '+e.message;
