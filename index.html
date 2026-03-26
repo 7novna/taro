@@ -478,17 +478,17 @@ function performReading(sp, q, count) {
     document.getElementById('ldiv').style.display='none';
     var area=document.getElementById('rdiv');
     p.cards.forEach(function(c,i){
-  var d=document.createElement('div');
-  d.className='rb';
-  var cleanReading = cleanText(c.reading);
-  d.innerHTML='<div class="rb-name">'+drawn[i].name+'</div><div class="rb-text">'+cleanReading+'</div>';
-  area.appendChild(d);
-});
-if(p.conclusion){
-  var cleanConclusion = cleanText(p.conclusion);
-  document.getElementById('ctxt').textContent=cleanConclusion;
-  document.getElementById('cdiv').style.display='block';
-}
+      var d=document.createElement('div');
+      d.className='rb';
+      var cleanReading = cleanText(c.reading);
+      d.innerHTML='<div class="rb-name">'+drawn[i].name+'</div><div class="rb-text">'+cleanReading+'</div>';
+      area.appendChild(d);
+    });
+    if(p.conclusion){
+      var cleanConclusion = cleanText(p.conclusion);
+      document.getElementById('ctxt').textContent=cleanConclusion;
+      document.getElementById('cdiv').style.display='block';
+    }
   })
   .catch(e=>{
     document.getElementById('ldiv').textContent='⚠️ Ошибка: '+e.message;
